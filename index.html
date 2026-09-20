@@ -489,6 +489,43 @@
   @keyframes coffee-tint { to { background: #faf9dc; } }
   @keyframes coffee-wave { to { -webkit-mask-position: 60px 0; mask-position: 60px 0; } }
   @keyframes word-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  /* ---------- Floating reserve button ---------- */
+  .fab {
+    position: fixed;
+    right: max(18px, env(safe-area-inset-right));
+    bottom: max(18px, env(safe-area-inset-bottom));
+    z-index: 60;
+    display: inline-flex;
+    align-items: center;
+    height: 58px;
+    padding: 0 17px;
+    border-radius: 999px;
+    background: var(--ink);
+    color: var(--milk);
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 1rem;
+    text-decoration: none;
+    box-shadow: 0 12px 28px -10px rgba(30, 56, 30, .65), 0 2px 6px rgba(30, 56, 30, .25);
+    transition: transform .2s, box-shadow .2s;
+  }
+  .intro-on .fab { display: none; }
+  .fab svg { flex: none; width: 24px; height: 24px; }
+  .fab .label {
+    max-width: 0; opacity: 0; overflow: hidden; white-space: nowrap;
+    transition: max-width .35s ease, opacity .25s ease, margin .35s ease;
+  }
+  .fab.open .label, .fab:hover .label, .fab:focus-visible .label { max-width: 11em; opacity: 1; margin-left: .6rem; margin-right: .2rem; }
+  .fab:hover { transform: translateY(-2px); box-shadow: 0 16px 32px -10px rgba(30, 56, 30, .7), 0 2px 6px rgba(30, 56, 30, .25); }
+  .fab:focus-visible { outline: 3px solid var(--milk); outline-offset: 3px; box-shadow: 0 0 0 6px var(--ink); }
+  .fab::after {  /* soft pulse to catch the eye */
+    content: ""; position: absolute; inset: 0; border-radius: inherit;
+    border: 2px solid var(--ink); opacity: 0; pointer-events: none;
+    animation: fab-pulse 3.4s ease-out 2.5s infinite;
+  }
+  @keyframes fab-pulse { 0% { opacity: .5; transform: scale(1); } 60%, 100% { opacity: 0; transform: scale(1.35, 1.6); } }
+  @media (prefers-reduced-motion: reduce) { .fab::after { animation: none; } .fab, .fab .label { transition: none; } }
   @media (prefers-reduced-motion: reduce) { .intro-on #intro { display: none; } .intro-on, .intro-on body { overflow: auto; } }
 </style>
 <script>document.documentElement.classList.add('intro-on');</script>
@@ -1108,6 +1145,10 @@
   </div>
 </footer>
 
+<a class="fab" id="fab" href="https://www.google.com/maps/reserve/v/dine/c/WFbjuAYGDIM?source=pa&amp;hl=en-IN" target="_blank" rel="noopener" aria-label="Reserve a table">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/><path d="m9 15.2 2.2 2.2 4-4.2"/></svg><span class="label">Reserve a table</span>
+</a>
+
 <script>
   // ----- Menu: tabs and category chips -----
   (function () {
@@ -1263,6 +1304,23 @@
     links.addEventListener('click', function (e) { if (e.target.closest('a')) setOpen(false); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setOpen(false); });
     document.addEventListener('click', function (e) { if (!nav.contains(e.target)) setOpen(false); });
+  })();
+</script>
+<script>
+  // ----- Floating reserve button: label shows briefly, then tucks away -----
+  (function () {
+    var fab = document.getElementById('fab');
+    if (!fab) return;
+    var root = document.documentElement;
+    function start() {
+      fab.classList.add('open');
+      setTimeout(function () { fab.classList.remove('open'); }, 5000);
+    }
+    if (!root.classList.contains('intro-on')) { setTimeout(start, 600); return; }
+    var mo = new MutationObserver(function () {
+      if (!root.classList.contains('intro-on')) { mo.disconnect(); setTimeout(start, 900); }
+    });
+    mo.observe(root, { attributes: true, attributeFilter: ['class'] });
   })();
 </script>
 </body>
